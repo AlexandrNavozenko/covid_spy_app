@@ -10,8 +10,9 @@ class SelectedCountyService {
     final SharedPreferences prefs = await _prefs;
     final String state = prefs.getString('state') ?? null;
     final String county = prefs.getString('county') ?? null;
+    final bool isEnableNotification = prefs.getBool('isEnableNotification') ?? false;
 
-    return SelectedCounty(county: county, state: state);
+    return SelectedCounty(county: county, state: state, isEnableNotification: isEnableNotification);
   }
 
   static Future<SelectedCounty> commit(SelectedCounty selectedCounty) async {
@@ -30,4 +31,17 @@ class SelectedCountyService {
 
       return selectedCounty;
     }
+
+  static Future<bool> commitIsEnableNotification(bool isEnableNotification) async {
+    final SharedPreferences prefs = await _prefs;
+
+//      prefs.setString('state', selectedCounty.state);
+//      prefs.setString('county', selectedCounty.county);
+
+    prefs.setBool("isEnableNotification", isEnableNotification).then((bool success) {
+      return print('commit isEnableNotification: $isEnableNotification');
+    });
+
+    return isEnableNotification;
+  }
 }
