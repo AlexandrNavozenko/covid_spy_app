@@ -7,9 +7,10 @@ import 'package:sprinkle/WebResourceManager.dart';
 import 'package:sprinkle/SprinkleExtension.dart';
 
 class CountyInfoPage extends StatelessWidget {
+  final CountyInfo _countyInfo;
   final SelectedCounty _selectedCounty;
 
-  CountyInfoPage(this._selectedCounty);
+  CountyInfoPage(this._countyInfo, this._selectedCounty);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class CountyInfoPage extends StatelessWidget {
           Container(
             height: 50.0,
             child: InkWell(
-              onTap: () => Navigator.pop(context, _selectedCounty),
+              onTap: () => Navigator.pop(context, _countyInfo),
               child: Row(
                 children: <Widget>[
                   Icon(
@@ -68,7 +69,6 @@ class CountyInfoPage extends StatelessWidget {
               stream: manager.collection$,
               builder: (content, countiesInfo) {
                 return ListView.separated(
-                  key: ValueKey(SelectedCounty(state: _selectedCounty.state, county: _selectedCounty.county)),
                   itemCount: countiesInfo?.length ?? 0,
                   itemBuilder: (BuildContext context, int index) {
                     var countyInfo = countiesInfo[index];
@@ -77,8 +77,7 @@ class CountyInfoPage extends StatelessWidget {
 
                     return InkWell(
                         onTap: () {
-                          SelectedCounty selectedCounty =  SelectedCounty(county: countyInfo.county, state: countyInfo.state,);
-                          Navigator.pop(context, selectedCounty);
+                          Navigator.pop(context, countyInfo);
                         },
                         child: CardViewCounty(countyInfo: countyInfo, selectedCounty: _selectedCounty,));
 //                      ListTile(

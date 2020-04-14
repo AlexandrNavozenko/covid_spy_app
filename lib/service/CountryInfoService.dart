@@ -11,7 +11,7 @@ class CountryInfoService implements Service<CountyInfo>  {
 
     http.Response response = await http.get(_url);
 
-    await Future.delayed(Duration(seconds: 2));
+//    await Future.delayed(Duration(seconds: 2));
 
     String content = response.body;
 
@@ -26,8 +26,19 @@ class CountryInfoService implements Service<CountyInfo>  {
     return _countriesInfo.toList();
   }
 
-  Future<CountyInfo> singleBrowse({String filter}) async {
-    List<CountyInfo> list = await browse(filter: filter);
-    return list[0];
+  Future<CountyInfo> singleBrowse({String state, String county}) async {
+    Iterable<CountyInfo> _countiesInfoIterable;
+    CountyInfo _countyInfo;
+    List<CountyInfo> _countiesInfo = await browse();
+
+    if (county != null && county.isNotEmpty) {
+      _countiesInfoIterable = _countiesInfo.where((f) => f.county.contains(county)); //.where((countryInfo) => countryInfo.county.contains(state))
+    }
+
+    if (state != null && state.isNotEmpty) {
+      _countyInfo = _countiesInfoIterable.singleWhere((countryInfo) => countryInfo.state.contains(state), orElse: () => null);
+    }
+
+    return _countyInfo;
   }
 }

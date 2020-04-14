@@ -1,12 +1,11 @@
-import 'package:covidspyapp/builder/CountyInfoListBuilder.dart';
+import 'package:covidspyapp/builder/CountyInfoBuilder.dart';
 import 'package:covidspyapp/builder/HomePageBuilder.dart';
 import 'package:covidspyapp/model/CountyInfo.dart';
 import 'package:covidspyapp/model/SelectedCounty.dart';
+import 'package:covidspyapp/service/CountryInfoService.dart';
 import 'package:covidspyapp/service/SelectedCountyService.dart';
 import 'package:covidspyapp/ui/CountyInfoPage.dart';
 import 'package:flutter/material.dart';
-import 'package:sprinkle/SprinkleExtension.dart';
-import 'package:sprinkle/WebResourceManager.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,32 +14,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   SelectedCounty _selectedCounty;
-  Future<SelectedCounty> future;
-
-  WebResourceManager<CountyInfo> _manager;
-  String filter;
+  CountyInfo _countyInfo;
+  Future<SelectedCounty> futureSelectedCounty;
+  Future<CountyInfo> futureCountyInfo;
+  String _state;
+  String _county;
 
   void initState() {
     super.initState();
     fetch();
+//    fetchCountyInfo(state: _state, county: _county);
   }
 
   void fetch() async {
-    future = SelectedCountyService.browse();
-    _selectedCounty = await future;
-    print('initState ${_selectedCounty.county}, ${_selectedCounty.state}');
-    filter = _selectedCounty.state ?? '';
-    _manager.inFilter.add(filter);
-  }
+    futureSelectedCounty = SelectedCountyService.browse();
+    _selectedCounty = await futureSelectedCounty;
+    _state = _selectedCounty.state;
+    _county = _selectedCounty.county;
+    print('initState `SelectedCounty` $_county, $_state');
 
-  void countyInfoFetch() async {
-    _selectedCounty = await future;
+    futureCountyInfo =
+        CountryInfoService().singleBrowse(state: _state, county: _county);
+    _countyInfo = await futureCountyInfo;
+    print('initState `CountyInfo` ${_countyInfo.county}, ${_countyInfo.state}');
   }
 
   @override
   Widget build(BuildContext context) {
-    _manager = context.fetch<WebResourceManager<CountyInfo>>();
-
     return Scaffold(
       backgroundColor: Color(0xFFEDF0F6),
       body: SingleChildScrollView(
@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 18.0, color: Colors.black54),
               ),
             ),
-            _testColumn(),
+            _showCountyInfo(),
             Container(
               child: Column(
                 children: <Widget>[
@@ -93,43 +93,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-//  Widget _showSelectedCounty() {
-//    return HomePageBuilder(
-//      future: future,
-//      builder: (content, tourDetail) {
-//        return Text(
-//          _selectedCounty != null
-//              ? '${_selectedCounty.state}, ${_selectedCounty.county}'
-//              : 'Select county',
-//          style: TextStyle(
-//            fontSize: 18.0,
-//          ),
-//        );
-//      },
-//    );
-//  }
-
   Widget _changeSelectedCountyLink() {
     return InkWell(
       onTap: () async {
-        SelectedCounty currentCounty = await Navigator.push(
+        CountyInfo countyInfo = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => CountyInfoPage(_selectedCounty),
+            builder: (BuildContext context) =>
+                CountyInfoPage(_countyInfo, _selectedCounty),
           ),
         );
-        print(
-            'before setState ${currentCounty.state}, ${currentCounty.county}');
+        print('before setState ${countyInfo.state}, ${countyInfo.county}');
 
-        filter = currentCounty.state ?? '';
-        _manager.inFilter.add(filter);
-
+        SelectedCounty currentCounty =
+            SelectedCounty(state: countyInfo.state, county: countyInfo.county);
         SelectedCounty selectedCounty =
             await SelectedCountyService.commit(currentCounty);
 
         setState(() {
+          _countyInfo = countyInfo;
+          print(
+              'setState `CountyInfo` ${_countyInfo.state}, ${_countyInfo.county}');
+
           _selectedCounty = selectedCounty;
-          print('setState ${_selectedCounty.state}, ${_selectedCounty.county}');
+          print(
+              'setState `SelectedCounty` ${_selectedCounty.state}, ${_selectedCounty.county}');
         });
       },
       child: Text(
@@ -140,9 +128,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _testColumn() {
+  Widget _showCountyInfo() {
     return HomePageBuilder(
-      future: future,
+      future: futureSelectedCounty,
       builder: (content, selectedCounty) {
         return Column(
           children: <Widget>[
@@ -178,13 +166,13 @@ class _HomePageState extends State<HomePage> {
       alignment: Alignment.topLeft,
       width: double.infinity,
       height: 80.0,
-      child: CountyInfoListBuilder(
-        stream: _manager.collection$,
-        builder: (content, countiesInfo) {
-          var countyInfo = countiesInfo[0];
-          print('after filter: ${countyInfo.county}, ${countyInfo.state} !!!');
+      child: CountyInfoBuilder(
+        future: futureCountyInfo,
+        builder: (content, countyInfo) {
+          print(
+              'after filter: ${_countyInfo.county}, ${_countyInfo.state} !!!');
 
-          return countyInfo.county != null && countyInfo.state != null
+          return _countyInfo.county != null && _countyInfo.state != null
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -197,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           Text(
-                            countyInfo.cases,
+                            _countyInfo.cases,
                             style: TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
@@ -210,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           Text(
-                            countyInfo.deaths,
+                            _countyInfo.deaths,
                             style: TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
