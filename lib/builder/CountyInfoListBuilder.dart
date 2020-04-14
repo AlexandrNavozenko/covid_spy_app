@@ -15,6 +15,7 @@ class CountyInfoListBuilder extends StatelessWidget {
       stream: stream,
       onSuccess: (BuildContext context, List<CountyInfo> data) =>
           builder(context, data),
+//      onWaiting: (context) => LinearProgressIndicator(),
     );
   }
 }

@@ -1,9 +1,12 @@
+import 'package:covidspyapp/builder/CountyInfoListBuilder.dart';
 import 'package:covidspyapp/builder/HomePageBuilder.dart';
+import 'package:covidspyapp/model/CountyInfo.dart';
 import 'package:covidspyapp/model/SelectedCounty.dart';
 import 'package:covidspyapp/service/SelectedCountyService.dart';
 import 'package:covidspyapp/ui/CountyInfoPage.dart';
-import 'package:covidspyapp/ui/widget/CardViewCountyInfoWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:sprinkle/SprinkleExtension.dart';
+import 'package:sprinkle/WebResourceManager.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,24 +17,30 @@ class _HomePageState extends State<HomePage> {
   SelectedCounty _selectedCounty;
   Future<SelectedCounty> future;
 
+  WebResourceManager<CountyInfo> _manager;
+  String filter;
+
   void initState() {
     super.initState();
-    selectedCountyFetch();
-    countyInfoFetch();
+    fetch();
   }
 
-  void selectedCountyFetch() async {
+  void fetch() async {
     future = SelectedCountyService.browse();
     _selectedCounty = await future;
     print('initState ${_selectedCounty.county}, ${_selectedCounty.state}');
+    filter = _selectedCounty.state ?? '';
+    _manager.inFilter.add(filter);
   }
 
-  void countyInfoFetch() {
-
+  void countyInfoFetch() async {
+    _selectedCounty = await future;
   }
 
   @override
   Widget build(BuildContext context) {
+    _manager = context.fetch<WebResourceManager<CountyInfo>>();
+
     return Scaffold(
       backgroundColor: Color(0xFFEDF0F6),
       body: SingleChildScrollView(
@@ -111,8 +120,13 @@ class _HomePageState extends State<HomePage> {
         );
         print(
             'before setState ${currentCounty.state}, ${currentCounty.county}');
+
+        filter = currentCounty.state ?? '';
+        _manager.inFilter.add(filter);
+
         SelectedCounty selectedCounty =
             await SelectedCountyService.commit(currentCounty);
+
         setState(() {
           _selectedCounty = selectedCounty;
           print('setState ${_selectedCounty.state}, ${_selectedCounty.county}');
@@ -151,10 +165,76 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            CardViewCountyInfoWidget(selectedCounty: _selectedCounty),
+            _cardViewCountyInfoWidget(),
           ],
         );
       },
+    );
+  }
+
+  Widget _cardViewCountyInfoWidget() {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 20.0),
+      alignment: Alignment.topLeft,
+      width: double.infinity,
+      height: 80.0,
+      child: CountyInfoListBuilder(
+        stream: _manager.collection$,
+        builder: (content, countiesInfo) {
+          var countyInfo = countiesInfo[0];
+          print('after filter: ${countyInfo.county}, ${countyInfo.state} !!!');
+
+          return countyInfo.county != null && countyInfo.state != null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            'County Total ',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          Text(
+                            countyInfo.cases,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            ' cases, ',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          Text(
+                            countyInfo.deaths,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            ' deaths',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'Data from The New York Times',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ])
+              : Text(
+                  'Select county',
+                  style: TextStyle(color: Colors.red),
+                );
+        },
+      ),
     );
   }
 }
