@@ -1,5 +1,9 @@
 import 'dart:io';
 
+import 'dart:io' show Platform;
+import 'package:covidspyapp/utility/CloudFirestoreUtility.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covidspyapp/builder/CountyInfoBuilder.dart';
 import 'package:covidspyapp/builder/HomePageBuilder.dart';
 import 'package:covidspyapp/model/CountyInfo.dart';
@@ -16,6 +20,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  static bool _isDoubleMessage = false;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  CloudFirestoreUtility cloudFirestoreUtility;
+
   SelectedCounty _selectedCounty;
   CountyInfo _countyInfo;
   Future<SelectedCounty> futureSelectedCounty;
@@ -27,6 +35,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     fetch();
+    _initFirebaseServices();
+    cloudFirestoreUtility = CloudFirestoreUtility(_firebaseMessaging);
   }
 
   void fetch() async {
@@ -137,6 +147,8 @@ class _HomePageState extends State<HomePage> {
             SelectedCounty(state: countyInfo.state, county: countyInfo.county);
         SelectedCounty selectedCounty =
             await SelectedCountyService.commit(currentCounty);
+
+        cloudFirestoreUtility.saveTokenToDB(countyInfo.county, countyInfo.state);
 
         setState(() {
           _countyInfo = countyInfo;
@@ -301,6 +313,7 @@ class _HomePageState extends State<HomePage> {
         bool isEnableNotification =
             await SelectedCountyService.commitIsEnableNotification(
                 !_isEnableNotification);
+        cloudFirestoreUtility.saveTokenToDB(_county, _state);
         setState(() {
           _isEnableNotification = isEnableNotification;
         });
@@ -324,7 +337,13 @@ class _HomePageState extends State<HomePage> {
   Widget _raisedButtonExit() {
     return RaisedButton(
       color: Color(0xFFEDF0F6),
-      onPressed: () => exit(0),
+      onPressed: () async {
+//        bool isEnableNotification =
+//            await SelectedCountyService.commitIsEnableNotification(
+//            !_isEnableNotification);
+//        _isEnableNotification = isEnableNotification;
+        exit(0);
+      },
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
         side: BorderSide(color: Colors.red, width: 2.0),
@@ -339,5 +358,45 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  void _initFirebaseServices() {
+    _firebaseMessaging.configure(
+      // ignore: missing_return
+      onLaunch: (Map<String, dynamic> msg) {
+        print(' onLaunch called $msg');
+      },
+      // ignore: missing_return
+      onResume: (Map<String, dynamic> msg) {
+        print(' onResume called $msg');
+      },
+      // ignore: missing_return
+      onMessage: (Map<String, dynamic> msg) async {
+        print(' onMessage called $msg');
+        if (!_isDoubleMessage) {
+          _showMessage(context, msg);
+          _isDoubleMessage = !_isDoubleMessage;
+        }
+      },
+    );
+  }
+
+  void _showMessage(BuildContext context, Map<String, dynamic> msg) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Ok'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+            content: ListTile(
+              title: Text(msg['notification']['title']),
+              subtitle: Text(msg['notification']['body']),
+            ),
+          );
+        });
   }
 }

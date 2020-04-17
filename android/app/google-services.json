@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "57531934573",
+    "firebase_url": "https://pushnotificationapp-f3e69.firebaseio.com",
+    "project_id": "pushnotificationapp-f3e69",
+    "storage_bucket": "pushnotificationapp-f3e69.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57531934573:android:f14876a0d1e243e7a21c64",
+        "android_client_info": {
+          "package_name": "com.deliasoft.pushnotificationflutterapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "57531934573-nqkvkqp07ai7a8gc5m0fn4m4oohblvek.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.deliasoft.pushnotificationflutterapp",
+            "certificate_hash": "01bcc74ebfb2e31a5e74063966e9f5f88738ea9f"
+          }
+        },
+        {
+          "client_id": "57531934573-v7qunfu0lac9o3dko4pg92g04eb4e9lv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXNlGgzbIk4J7EMI52N8G_s9WTU34esb0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "57531934573-v7qunfu0lac9o3dko4pg92g04eb4e9lv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
