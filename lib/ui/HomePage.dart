@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'dart:io' show Platform;
+import 'package:covidspyapp/ui/widget/NativAdmobWidget.dart';
+import 'package:covidspyapp/utility/AdmobUtility.dart';
 import 'package:covidspyapp/utility/CloudFirestoreUtility.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covidspyapp/builder/CountyInfoBuilder.dart';
 import 'package:covidspyapp/builder/HomePageBuilder.dart';
 import 'package:covidspyapp/model/CountyInfo.dart';
@@ -13,6 +13,8 @@ import 'package:covidspyapp/service/SelectedCountyService.dart';
 import 'package:covidspyapp/ui/CountyInfoPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_admob/flutter_native_admob.dart';
+import 'package:flutter_native_admob/native_admob_controller.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -65,6 +67,7 @@ class _HomePageState extends State<HomePage> {
               width: double.infinity,
               height: 120.0,
               decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [Colors.grey, Colors.black]),
                   color: Colors.grey,
                   borderRadius: BorderRadius.only(
                     bottomRight: Radius.circular(120.0),
@@ -94,16 +97,14 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     width: double.infinity,
                     height: 250.0,
-                    color: Colors.red[300],
+//                    color: Colors.grey[300],
                     child: Center(
-                        child: Text(
-                      'AD is here 300x250',
-                      style: TextStyle(color: Colors.white, fontSize: 20.0),
-                    )),
+                      child: NativAdmobWidget(),
+                    ),
                   ),
                   Container(
                     alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(top: 5.0),
+                    padding: EdgeInsets.only(top: 10.0),
                     child: InkWell(
                       onTap: () => print('Remove ADS'),
                       child: Container(
@@ -148,7 +149,8 @@ class _HomePageState extends State<HomePage> {
         SelectedCounty selectedCounty =
             await SelectedCountyService.commit(currentCounty);
 
-        cloudFirestoreUtility.saveTokenToDB(countyInfo.county, countyInfo.state);
+        cloudFirestoreUtility.saveTokenToDB(
+            countyInfo.county, countyInfo.state);
 
         setState(() {
           _countyInfo = countyInfo;
@@ -295,10 +297,6 @@ class _HomePageState extends State<HomePage> {
                   ? _raisedButtonExit()
                   : _raisedButtonEnableNotification(),
             ),
-//                Container(
-//                  width: double.infinity,
-//                  height: 30.0,
-//                ),
           ],
         );
       },
@@ -338,10 +336,10 @@ class _HomePageState extends State<HomePage> {
     return RaisedButton(
       color: Color(0xFFEDF0F6),
       onPressed: () async {
-//        bool isEnableNotification =
-//            await SelectedCountyService.commitIsEnableNotification(
-//            !_isEnableNotification);
-//        _isEnableNotification = isEnableNotification;
+        bool isEnableNotification =
+            await SelectedCountyService.commitIsEnableNotification(
+            !_isEnableNotification);
+        _isEnableNotification = isEnableNotification;
         exit(0);
       },
       shape: RoundedRectangleBorder(
