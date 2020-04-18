@@ -4,7 +4,7 @@ import 'package:covidspyapp/model/CountyInfo.dart';
 import 'package:http/http.dart' as http;
 import 'package:sprinkle/Service.dart';
 
-class CountryInfoService implements Service<CountyInfo>  {
+class CountyInfoService implements Service<CountyInfo>  {
   String _url = 'http://www.mocky.io/v2/5e95b0d62f0000560002536e';
 
   Future<List<CountyInfo>> browse({String filter}) async {
@@ -19,8 +19,9 @@ class CountryInfoService implements Service<CountyInfo>  {
 
     Iterable<CountyInfo> _countriesInfo = collection.map((_) => CountyInfo.fromJson(_));
 
-    if (filter != null && filter.isNotEmpty) {
-      _countriesInfo = _countriesInfo.where((countryInfo) => countryInfo.state.contains(filter));
+    if (filter != null && filter.isNotEmpty && filter.length > 2) {
+      _countriesInfo = _countriesInfo.where((countryInfo) => countryInfo.state.toLowerCase().contains(filter.toLowerCase()));
+      print(filter);
     }
 
     return _countriesInfo.toList();

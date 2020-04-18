@@ -2,6 +2,7 @@ import 'package:covidspyapp/builder/CountyInfoListBuilder.dart';
 import 'package:covidspyapp/model/CountyInfo.dart';
 import 'package:covidspyapp/model/SelectedCounty.dart';
 import 'package:covidspyapp/ui/widget/CardViewCountyWidget.dart';
+import 'package:covidspyapp/utility/RxTextField.dart';
 import 'package:flutter/material.dart';
 import 'package:sprinkle/WebResourceManager.dart';
 import 'package:sprinkle/SprinkleExtension.dart';
@@ -17,6 +18,8 @@ class CountyInfoPage extends StatelessWidget {
     WebResourceManager<CountyInfo> manager =
         context.fetch<WebResourceManager<CountyInfo>>();
     manager.inFilter.add('');
+
+    var _controller = TextEditingController();
 
     return Scaffold(
       body: Column(
@@ -47,7 +50,22 @@ class CountyInfoPage extends StatelessWidget {
           ),
           Container(
             height: 50.0,
-            color: Colors.green,
+            child: ListTile(
+              title: RxTextField(
+                subscribe: manager.collection$,
+                dispatch: manager.inFilter.add,
+                controller: _controller,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  suffixIcon: IconButton(icon: Icon(Icons.close), onPressed: () {
+                    _controller.clear();
+                    manager.inFilter.add('');
+                  }),
+                  labelText: 'Search',
+                  labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
           ),
           Divider(),
 //          Container(

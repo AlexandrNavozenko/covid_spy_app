@@ -1,5 +1,5 @@
 import 'package:covidspyapp/model/CountyInfo.dart';
-import 'package:covidspyapp/service/CountryInfoService.dart';
+import 'package:covidspyapp/service/CountyInfoService.dart';
 import 'package:covidspyapp/ui/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:sprinkle/Overseer.dart';
@@ -15,7 +15,7 @@ class CovidSpy extends StatelessWidget {
     return Provider(
       data:  Overseer()
           .register<WebResourceManager<CountyInfo>>(
-              () => WebResourceManager<CountyInfo>(CountryInfoService())),
+              () => WebResourceManager<CountyInfo>(CountyInfoService())),
       child: MaterialApp(
         title: 'Covid Spy Flutter App',
         theme: ThemeData(
