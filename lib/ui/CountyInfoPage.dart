@@ -50,20 +50,20 @@ class CountyInfoPage extends StatelessWidget {
             color: Colors.green,
           ),
           Divider(),
-          Container(
-            width: double.infinity,
-            height: 50.0,
-            alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(vertical: 10),
-            color: Color(0xFFEDF0F6),
-            child: Text(
-              'SELECT COUNTY',
-              style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w600),
-            ),
-          ),
+//          Container(
+//            width: double.infinity,
+//            height: 50.0,
+//            alignment: Alignment.center,
+//            padding: EdgeInsets.symmetric(vertical: 10),
+//            color: Color(0xFFEDF0F6),
+//            child: Text(
+//              'SELECT COUNTY',
+//              style: TextStyle(
+//                  color: Colors.black54,
+//                  fontSize: 18.0,
+//                  fontWeight: FontWeight.w600),
+//            ),
+//          ),
           Expanded(
             child: CountyInfoListBuilder(
               stream: manager.collection$,

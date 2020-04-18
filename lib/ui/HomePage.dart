@@ -12,6 +12,7 @@ import 'package:covidspyapp/service/SelectedCountyService.dart';
 import 'package:covidspyapp/ui/CountyInfoPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -63,12 +64,40 @@ class _HomePageState extends State<HomePage> {
             Container(
               width: double.infinity,
               height: 120.0,
+              alignment: Alignment.bottomLeft,
+              padding: EdgeInsets.only(left: 20.0, bottom: 10.0),
               decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Colors.grey, Colors.black]),
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(120.0),
-                  )),
+                gradient: LinearGradient(colors: [Colors.grey, Colors.black]),
+                color: Colors.grey,
+                borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(120.0),
+                ),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Image(
+                    height: 70.0,
+                    width: 70.0,
+                    image: AssetImage('assets/images/covid-spy.png'),
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(width: 15.0,),
+                  Container(
+                    height: 70.0,
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      'COVID Spy',
+                      style: GoogleFonts.audiowide(
+                        textStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26.0,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Container(
               padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
@@ -141,8 +170,10 @@ class _HomePageState extends State<HomePage> {
         );
         print('before setState ${countyInfo.state}, ${countyInfo.county}');
 
-        SelectedCounty currentCounty =
-            SelectedCounty(state: countyInfo.state, county: countyInfo.county, isEnableNotification: _isEnableNotification);
+        SelectedCounty currentCounty = SelectedCounty(
+            state: countyInfo.state,
+            county: countyInfo.county,
+            isEnableNotification: _isEnableNotification);
         SelectedCounty selectedCounty =
             await SelectedCountyService.commit(currentCounty);
 
@@ -315,7 +346,10 @@ class _HomePageState extends State<HomePage> {
                 !_isEnableNotification);
         _isEnableNotification = isEnableNotification;
 
-        _selectedCounty = SelectedCounty(state: _state, county: _county, isEnableNotification: _isEnableNotification);
+        _selectedCounty = SelectedCounty(
+            state: _state,
+            county: _county,
+            isEnableNotification: _isEnableNotification);
 
         cloudFirestoreUtility.saveTokenToDB(_county, _state);
         setState(() {});
