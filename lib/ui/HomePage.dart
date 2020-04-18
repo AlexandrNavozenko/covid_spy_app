@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:covidspyapp/ui/widget/NativAdmobWidget.dart';
-import 'package:covidspyapp/utility/AdmobUtility.dart';
 import 'package:covidspyapp/utility/CloudFirestoreUtility.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:covidspyapp/builder/CountyInfoBuilder.dart';
@@ -13,8 +12,6 @@ import 'package:covidspyapp/service/SelectedCountyService.dart';
 import 'package:covidspyapp/ui/CountyInfoPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_admob/flutter_native_admob.dart';
-import 'package:flutter_native_admob/native_admob_controller.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -145,15 +142,20 @@ class _HomePageState extends State<HomePage> {
         print('before setState ${countyInfo.state}, ${countyInfo.county}');
 
         SelectedCounty currentCounty =
-            SelectedCounty(state: countyInfo.state, county: countyInfo.county);
+            SelectedCounty(state: countyInfo.state, county: countyInfo.county, isEnableNotification: _isEnableNotification);
         SelectedCounty selectedCounty =
             await SelectedCountyService.commit(currentCounty);
 
-        cloudFirestoreUtility.saveTokenToDB(
-            countyInfo.county, countyInfo.state);
+        if (currentCounty.isEnableNotification) {
+          cloudFirestoreUtility.saveTokenToDB(
+              countyInfo.county, countyInfo.state);
+        }
 
         setState(() {
+          _county = countyInfo.county;
+          _state = countyInfo.state;
           _countyInfo = countyInfo;
+
           print(
               'setState `CountyInfo` ${_countyInfo.state}, ${_countyInfo.county}');
 
@@ -311,10 +313,12 @@ class _HomePageState extends State<HomePage> {
         bool isEnableNotification =
             await SelectedCountyService.commitIsEnableNotification(
                 !_isEnableNotification);
+        _isEnableNotification = isEnableNotification;
+
+        _selectedCounty = SelectedCounty(state: _state, county: _county, isEnableNotification: _isEnableNotification);
+
         cloudFirestoreUtility.saveTokenToDB(_county, _state);
-        setState(() {
-          _isEnableNotification = isEnableNotification;
-        });
+        setState(() {});
       },
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
@@ -338,7 +342,7 @@ class _HomePageState extends State<HomePage> {
       onPressed: () async {
         bool isEnableNotification =
             await SelectedCountyService.commitIsEnableNotification(
-            !_isEnableNotification);
+                !_isEnableNotification);
         _isEnableNotification = isEnableNotification;
         exit(0);
       },

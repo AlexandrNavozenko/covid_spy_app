@@ -29,11 +29,12 @@ class CloudFirestoreUtility {
   }
 
   void _saveDeviseToken(String county, String state) async {
-
-
     String fcmToken = await firebaseMessaging.getToken();
+    print(fcmToken);
 
     if (fcmToken != null) {
+      print('`saveDeviseToken` $county, $state');
+
       var tokenReference = _db
           .collection('users')
           .document(_uid)
