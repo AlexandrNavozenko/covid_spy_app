@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:covidspyapp/ui/TermOfUsePage.dart';
 import 'package:covidspyapp/ui/widget/NativeAdmobWidget.dart';
 import 'package:covidspyapp/utility/CloudFirestoreUtility.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
