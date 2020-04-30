@@ -22,7 +22,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static bool _isDoubleMessage = false;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  CloudFirestoreUtility cloudFirestoreUtility;
+  CloudFirestoreUtility _cloudFirestoreUtility;
 
   SelectedCounty _selectedCounty;
   CountyInfo _countyInfo;
@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     fetch();
     _initFirebaseServices();
-    cloudFirestoreUtility = CloudFirestoreUtility(_firebaseMessaging);
+    _cloudFirestoreUtility = CloudFirestoreUtility(_firebaseMessaging);
   }
 
   void fetch() async {
@@ -128,7 +128,30 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(fontSize: 16.0, color: Colors.black54),
             ),
           ),
-          _showCountyInfo(),
+          Column(
+            children: <Widget>[
+              Container(
+                color: Colors.white,
+                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                alignment: Alignment.bottomLeft,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      _selectedCounty != null
+                          ? '${_selectedCounty.state}, ${_selectedCounty.county}'
+                          : 'Select county',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    _changeSelectedCountyLink(),
+                  ],
+                ),
+              ),
+              _cardViewCountyInfoWidget(),
+            ],
+          ),
           Container(
             padding: EdgeInsets.only(top: 20.0),
             width: 300.0,
@@ -221,7 +244,7 @@ class _HomePageState extends State<HomePage> {
             await SelectedCountyService.commit(currentCounty);
 
         if (currentCounty.isEnableNotification) {
-          cloudFirestoreUtility.saveTokenToDB(
+          _cloudFirestoreUtility.saveTokenToDB(
               countyInfo.county, countyInfo.state);
         }
 
@@ -243,38 +266,6 @@ class _HomePageState extends State<HomePage> {
         style: TextStyle(
             fontSize: 18.0, color: Colors.black54, fontWeight: FontWeight.bold),
       ),
-    );
-  }
-
-  Widget _showCountyInfo() {
-    return HomePageBuilder(
-      future: futureSelectedCounty,
-      builder: (content, selectedCounty) {
-        return Column(
-          children: <Widget>[
-            Container(
-              color: Colors.white,
-              padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-              alignment: Alignment.bottomLeft,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    selectedCounty != null
-                        ? '${_selectedCounty.state}, ${_selectedCounty.county}'
-                        : 'Select county',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                    ),
-                  ),
-                  _changeSelectedCountyLink(),
-                ],
-              ),
-            ),
-            _cardViewCountyInfoWidget(),
-          ],
-        );
-      },
     );
   }
 
@@ -345,37 +336,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _revolveRaisedButton() {
-    return HomePageBuilder(
-      future: futureSelectedCounty,
-      builder: (content, selectedCounty) {
-        return Column(
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 15.0),
-              alignment: Alignment.bottomLeft,
-              width: double.infinity,
-              height: 50.0,
-              child: _isEnableNotification
-                  ? Text(
-                      'Notifications enabled! You are all set.',
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0),
-                    )
-                  : SizedBox.shrink(),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 30.0),
-              width: double.infinity,
-              height: 60.0,
-              child: _isEnableNotification
-                  ? _raisedButtonExit()
-                  : _raisedButtonEnableNotification(),
-            ),
-          ],
-        );
-      },
+    return Column(
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 15.0),
+          alignment: Alignment.bottomLeft,
+          width: double.infinity,
+          height: 50.0,
+          child: _isEnableNotification
+              ? Text(
+            'Notifications enabled! You are all set.',
+            style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0),
+          )
+              : SizedBox.shrink(),
+        ),
+        Container(
+          margin: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 30.0),
+          width: double.infinity,
+          height: 60.0,
+          child: _isEnableNotification
+              ? _raisedButtonExit()
+              : _raisedButtonEnableNotification(),
+        ),
+      ],
     );
   }
 
@@ -394,7 +380,7 @@ class _HomePageState extends State<HomePage> {
             county: _county,
             isEnableNotification: _isEnableNotification);
 
-        cloudFirestoreUtility.saveTokenToDB(_county, _state);
+        _cloudFirestoreUtility.saveTokenToDB(_county, _state);
         setState(() {});
       },
       shape: RoundedRectangleBorder(
